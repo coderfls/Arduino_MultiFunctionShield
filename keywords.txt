@@ -1,0 +1,17 @@
+# Syntax Coloring Map For ExampleLibrary
+
+# Datatypes (KEYWORD1)
+MultiFunctionShield    KEYWORD1
+
+# Methods and Functions (KEYWORD2)
+begin KEYWORD2
+Display KEYWORD2
+
+# Instances (KEYWORD2)
+
+# Constants (LITERAL1)
+LATCH LITERAL1
+CLK LITERAL1
+DATA LITERAL1
+SEGMENT_MAP LITERAL1
+SEGMENT_SELECT LITERAL1
