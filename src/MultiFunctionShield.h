@@ -1,30 +1,72 @@
 #ifndef MultiFunctionShield_h
   #define MultiFunctionShield_h
 
-#if not defined (__AVR_ATmega328P__)  // Arduino UNO, NANO
-  #warning Library only for Arduino Uno, Nano and so on with ATmega328
+#ifndef __AVR_ATmega328P__  // Arduino UNO, NANO
+  #error : Library only for Arduino Uno, Nano and so on with ATmega328
 #endif
 
 #include "Arduino.h"
 #include <avr/interrupt.h>
 
+const uint8_t LED_1_PIN=13;
+const uint8_t LED_2_PIN=12;
+const uint8_t LED_3_PIN=11;
+const uint8_t LED_4_PIN=10;
+const uint8_t POT_PIN=0;
+const uint8_t BUZZER_PIN=3;
+const uint8_t BUTTON_1_PIN=A1;
+const uint8_t BUTTON_2_PIN=A2;
+const uint8_t BUTTON_3_PIN=A3;
+const uint8_t LATCH_PIN=4;
+const uint8_t CLK_PIN=7;
+const uint8_t DATA_PIN=8;
+const uint8_t LM35_PIN=A4;
+
 class MultiFunctionShield
 {
   public:
-    MultiFunctionShield();
+    /**
+      @brief  Constructor
+      @param  none
+      @return none
+    */
+    MultiFunctionShield(void);
+
+    /**
+      @brief  Initialization
+      @param  none
+      @return none
+    */
     void begin(void);
-    void Display (uint16_t val);
+
+    /**
+      @brief  Write a given int value on the display (in the next IRQ)
+      @param  value
+      @return none
+    */
+    void Display (int16_t);
+
+    /**
+      @brief  Clears the display ("    ");
+      @param  none
+      @return none
+    */
+    void Clear (void);
+
+    /**
+      @brief  Called by ISR. Do not use
+      @param  none
+      @return none
+    */
+    void ISRFunc(void);
 
   private:
-    void WriteNumberToSegment(uint8_t digit, uint8_t value);
+    /**
+      @brief  Writes the value for one segment to the display. The value is saved in a lokal variable
+      @param  Display position (0..3, 0=left)
+      @return none
+    */
+     void WriteNumberToSegment(uint8_t);
 };
-
-static const uint8_t LATCH = 4;
-static const uint8_t CLK = 7;
-static const uint8_t DATA = 8;
-static const uint8_t SEGMENT_MAP[] = {0xC0,0xF9,0xA4,0xB0,0x99,0x92,0x82,0xF8,0X80,0X90};    // Segmente, die leuchten sollen pro Zahlwert (Low-Aktiv), & 0x7F Verknüpfen fuer Dezimalpunkt
-static const uint8_t SEGMENT_SELECT[] = {0xF1,0xF2,0xF4,0xF8};                               // Ziffernposition (gemeinsame Anode, LSB)
-
-volatile uint8_t ActDigit = 0;
 
 #endif
