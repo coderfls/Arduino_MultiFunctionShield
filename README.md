@@ -1,7 +1,7 @@
 # Arduino_MultiFunctionShield
 LED Display driver for Multi Function Shield
 
-**Note:** Timer1 used => Pins 9 and 10 on Uno for PWM and analoWrite() are effected
+**Note:** Timer1 used => Pins 9 and 10 on Uno for PWM and analogWrite() are effected
 
 ![multi_function_shield](multi_function_shield.png?raw=true)
 
