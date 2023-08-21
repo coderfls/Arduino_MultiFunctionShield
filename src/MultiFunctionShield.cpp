@@ -9,6 +9,10 @@
  */
 
 #include <MultiFunctionShield.h>
+#ifdef ARDUINO_R4
+#include "FspTimer.h"
+FspTimer display_timer;
+#endif
 
 const uint8_t SEGMENT_MAP[] = {0xC0,0xF9,0xA4,0xB0,0x99,0x92,0x82,0xF8,0x80,0x90};    // Segmente, die leuchten sollen pro Zahlwert (Low-Aktiv), & 0x7F Verknüpfen fuer Dezimalpunkt
 const uint8_t SEGMENT_BLANK = 0xFF;
@@ -24,20 +28,70 @@ MultiFunctionShield::MultiFunctionShield(void)  //constructor
   instance = this;
 }
 
+#ifdef ARDUINO_R4
+// callback method used by timer
+void timer_callback(timer_callback_args_t __attribute((unused)) *p_args) {
+  instance->ISRFunc();
+}
+bool beginTimer(float rate) {
+  uint8_t timer_type = GPT_TIMER;
+  int8_t tindex = FspTimer::get_available_timer(timer_type);
+  if (tindex < 0){
+    tindex = FspTimer::get_available_timer(timer_type, true);
+  }
+  if (tindex < 0){
+    return false;
+  }
+
+  FspTimer::force_use_of_pwm_reserved_timer();
+
+  if(!display_timer.begin(TIMER_MODE_PERIODIC, timer_type, tindex, rate, 0.0f, timer_callback)){
+    return false;
+  }
+
+  if (!display_timer.setup_overflow_irq()){
+    return false;
+  }
+
+  if (!display_timer.open()){
+    return false;
+  }
+
+  if (!display_timer.start()){
+    return false;
+  }
+  return true;
+}
+#else
+ISR(TIMER1_COMPA_vect)          // interrupt service routine 
+{
+  instance->ISRFunc();
+} 
+#endif
+
 void MultiFunctionShield::begin(void)
 {
+#ifdef ARDUINO_R4
+  pinMode(BUZZER_PIN, OUTPUT);  
+  digitalWrite(BUZZER_PIN, HIGH);   // second! else forever sound
+#else
   digitalWrite(BUZZER_PIN, HIGH);   // first! else short sound
-  pinMode(BUZZER_PIN, OUTPUT);
+  pinMode(BUZZER_PIN, OUTPUT);                                    
+#endif
 
   pinMode(LATCH_PIN,OUTPUT);
   pinMode(CLK_PIN,OUTPUT);
   pinMode(DATA_PIN,OUTPUT);
     
+#ifdef ARDUINO_R4
+	beginTimer(1000); // 1kHz
+#else
   TCCR1A = 0;                                           // Register loeschen
   OCR1A = 1000;                                         // Vergleichswert x = (CPU / (2 x Teiler x f)) - 1
   TCCR1B |= (1 << CS10) | (1 << CS11) | (1 << WGM12);   // CTC-Mode, Teiler = 64
   TIMSK1 |= (1 << OCIE1A);                              // Output Compare A Match Interrupt Enable
   sei();                                                // IRQ Enable
+#endif
 
   Clear();
 }
@@ -120,7 +174,3 @@ void MultiFunctionShield::ISRFunc(void)
   }
 }
     
-ISR(TIMER1_COMPA_vect)          // interrupt service routine 
-{
-  instance->ISRFunc();
-} 
