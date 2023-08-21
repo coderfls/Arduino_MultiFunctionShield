@@ -1,12 +1,19 @@
 #ifndef MultiFunctionShield_h
   #define MultiFunctionShield_h
 
+// TODO: better define
+#define ARDUINO_R4 1
+
+#ifdef ARDUINO_R4
+
+#else
 #ifndef __AVR_ATmega328P__  // Arduino UNO, NANO
   #error : Library only for Arduino Uno, Nano and so on with ATmega328
 #endif
+#include <avr/interrupt.h>
+#endif
 
 #include "Arduino.h"
-#include <avr/interrupt.h>
 
 const uint8_t LED_1_PIN=13;
 const uint8_t LED_2_PIN=12;
